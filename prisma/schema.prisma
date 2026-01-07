@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int      @id @default(autoincrement())
+  email       String   @unique
+  password    String
+  name        String
+  employee_id String?  @unique
+  role        String   @default("employee")
+  department  String?
+  position    String?
+  join_date   DateTime
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  sick_leave_balance    Int @default(7)
+  casual_leave_balance  Int @default(7)
+  medical_leave_balance Int @default(0)
+
+  // Relations with names
+  leaves         Leave[]      @relation("EmployeeLeaves")
+  approvedLeaves Leave[]      @relation("ApprovedLeaves")
+  attendances    Attendance[]
+  penalties      Penalty[]
+
+  @@map("users")
+}
+
+model Leave {
+  id               Int       @id @default(autoincrement())
+  employee_id      Int
+  leave_type       String // "sick", "casual", "medical"
+  start_date       DateTime
+  end_date         DateTime
+  total_days       Int
+  reason           String?
+  proof_url        String?
+  status           String    @default("pending") // "pending", "approved", "rejected"
+  approved_by      Int?
+  approved_at      DateTime?
+  rejection_reason String?
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+
+  // Additional fields
+  is_sandwich Boolean @default(false)
+  doctor_note Boolean @default(false)
+
+  // Relations with different names
+  employee User  @relation("EmployeeLeaves", fields: [employee_id], references: [id])
+  approver User? @relation("ApprovedLeaves", fields: [approved_by], references: [id])
+
+  @@map("leaves")
+}
+
+model Attendance {
+  id           Int       @id @default(autoincrement())
+  employee_id  Int
+  date         DateTime
+  check_in     DateTime?
+  check_out    DateTime?
+  status       String    @default("present") // "present", "absent", "half_day"
+  hours_worked Float?
+  is_late      Boolean   @default(false)
+  notes        String?
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+
+  employee User @relation(fields: [employee_id], references: [id])
+
+  @@unique([employee_id, date])
+  @@map("attendances")
+}
+
+model Penalty {
+  id           Int      @id @default(autoincrement())
+  employee_id  Int
+  penalty_type String
+  description  String
+  penalty_days Float
+  applied_date DateTime
+  status       String   @default("active")
+  created_at   DateTime @default(now())
+
+  employee User @relation(fields: [employee_id], references: [id])
+
+  @@map("penalties")
+}
+
+model SystemConfig {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique
+  value       String
+  description String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@map("system_configs")
+}
