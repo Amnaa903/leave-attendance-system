@@ -1,64 +1,57 @@
-export default function Home() {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-100 flex items-center justify-center p-4">
-      <div className="text-center max-w-2xl">
-        <h1 className="text-5xl font-bold text-gray-900 mb-6">
-          ✅ Leave & Attendance System
-        </h1>
-        <p className="text-xl text-gray-600 mb-8">
-          Professional HR Management Platform
-        </p>
+"use client"
 
-        <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
-          <div className="flex items-center justify-center mb-6">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-              <span className="text-3xl">🎉</span>
-            </div>
-          </div>
+import dynamic from "next/dynamic"
+import { useEffect, useState } from "react"
 
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">
-            Day 1: Setup Complete!
-          </h2>
+const EmployeeDashboard = dynamic(() => import("./employee/dashboard/page"), { ssr: false })
+const ManagerDashboard = dynamic(() => import("./manager/dashboard/page"), { ssr: false })
+const AdminDashboard = dynamic(() => import("./admin/dashboard/page"), { ssr: false })
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h3 className="font-bold text-blue-700 mb-1">Database</h3>
-              <p className="text-gray-700 text-sm">MySQL Connected</p>
-            </div>
-            <div className="bg-green-50 p-4 rounded-lg">
-              <h3 className="font-bold text-green-700 mb-1">Prisma</h3>
-              <p className="text-gray-700 text-sm">ORM Ready</p>
-            </div>
-            <div className="bg-purple-50 p-4 rounded-lg">
-              <h3 className="font-bold text-purple-700 mb-1">Next.js</h3>
-              <p className="text-gray-700 text-sm">14.2.35 Running</p>
-            </div>
-          </div>
+export default function Page() {
+  const [userRole, setUserRole] = useState<"employee" | "manager" | "admin" | null>(null)
+  const [loading, setLoading] = useState(true)
 
-          <div className="bg-gray-50 p-6 rounded-lg">
-            <h3 className="font-bold mb-4">Test Users Created:</h3>
-            <div className="space-y-3 text-left">
-              <div className="flex items-center">
-                <div className="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
-                <span><strong>Admin:</strong> admin@company.com / admin123</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-                <span><strong>Manager:</strong> manager@company.com / manager123</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-3 h-3 bg-purple-500 rounded-full mr-3"></div>
-                <span><strong>Employee:</strong> employee@company.com / employee123</span>
-              </div>
-            </div>
-          </div>
-        </div>
+  useEffect(() => {
+    // Check user role from token or session
+    // For now, we'll default to employee dashboard
+    // You can modify this to fetch the actual user role from your backend
+    const token = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("token="))
+      ?.split("=")[1]
 
-        <div className="text-gray-500 text-sm">
-          <p>Ready to build dashboards, authentication, and business logic!</p>
-          <p className="mt-2">Tomorrow: Authentication System & Login Pages</p>
+    if (token) {
+      // Decode token or fetch user info to determine role
+      // This is a placeholder - adjust based on your auth logic
+      const role = localStorage.getItem("userRole") as "employee" | "manager" | "admin" | null
+      setUserRole(role || "employee")
+    } else {
+      // Redirect to login if no token
+      window.location.href = "/login"
+    }
+
+    setLoading(false)
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-blue-50/30">
+        <div className="text-center">
+          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500 mx-auto mb-4 animate-pulse"></div>
+          <p className="text-gray-600">Loading...</p>
         </div>
       </div>
-    </div>
-  )
+    )
+  }
+
+  // Render appropriate dashboard based on user role
+  if (userRole === "admin") {
+    return <AdminDashboard />
+  }
+
+  if (userRole === "manager") {
+    return <ManagerDashboard />
+  }
+
+  return <EmployeeDashboard />
 }

@@ -1,21 +1,12 @@
-import type { Metadata } from "next";
-// import "./globals.css";
+import './globals.css'  // <-- your Tailwind + custom CSS
+import { Inter } from 'next/font/google'
 
-export const metadata: Metadata = {
-  title: "Leave & Attendance System",
-  description: "Professional HR Management Platform",
-};
+export const metadata = { title: 'LeaveSync', description: '' }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
-  );
+  )
 }

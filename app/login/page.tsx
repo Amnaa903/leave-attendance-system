@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { LogIn } from 'lucide-react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -42,9 +43,14 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-gray-50 p-4">
+      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-2xl shadow-md border">
         <div className="text-center">
+          <div className="flex justify-center mb-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-full flex items-center justify-center">
+              <LogIn size={24} className="text-white" />
+            </div>
+          </div>
           <h1 className="text-3xl font-bold text-gray-900">Leave Management System</h1>
           <p className="mt-2 text-gray-600">Track leaves, manage attendance, and streamline HR processes</p>
         </div>
@@ -65,7 +71,7 @@ export default function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              className="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               placeholder="Enter your email"
               required
               aria-required="true"
@@ -82,7 +88,7 @@ export default function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              className="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               placeholder="Enter your password"
               required
               aria-required="true"
@@ -93,7 +99,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            className="w-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white py-3 px-4 rounded-lg font-medium hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105"
             aria-label={loading ? 'Signing in...' : 'Sign in to your account'}
           >
             {loading ? (
@@ -126,7 +132,7 @@ export default function LoginPage() {
               <div className="text-gray-600">manager@company.com</div>
               <div className="text-gray-600">Password: manager123</div>
             </div>
-            
+          
             <div className="bg-gray-50 p-3 rounded-lg">
               <div className="font-medium text-gray-900 mb-1">Employee</div>
               <div className="text-gray-600">employee@company.com</div>
