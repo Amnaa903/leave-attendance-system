@@ -74,20 +74,20 @@ export default function ApplyLeavePage() {
                         {/* Leave Type */}
                         <div>
                             <label className="block text-sm font-bold text-secondary-700 mb-3">Select Leave Type</label>
-                            <div className="grid grid-cols-3 gap-4">
-                                {['sick', 'casual', 'medical'].map((type) => (
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {['sick', 'casual', 'medical', 'work_from_home'].map((type) => (
                                     <div
                                         key={type}
                                         onClick={() => setFormData({ ...formData, leave_type: type })}
                                         className={`
-                                    cursor-pointer rounded-xl border-2 p-4 text-center capitalize transition-all duration-200 font-bold
+                                    cursor-pointer rounded-xl border-2 p-4 text-center capitalize transition-all duration-200 font-bold text-sm flex items-center justify-center
                                     ${formData.leave_type === type
                                                 ? 'border-primary-500 bg-primary-50 text-primary-700 shadow-sm'
                                                 : 'border-secondary-100 hover:border-secondary-300 hover:bg-secondary-50 text-secondary-600'
                                             }
                                 `}
                                     >
-                                        {type}
+                                        {type.replace(/_/g, ' ')}
                                     </div>
                                 ))}
                             </div>

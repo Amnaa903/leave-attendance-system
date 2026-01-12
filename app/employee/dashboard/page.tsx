@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Calendar, Clock, AlertCircle, FileText, CheckCircle, XCircle, LogOut } from "lucide-react"
+import { Calendar, Clock, AlertCircle, FileText, CheckCircle, XCircle, LogOut, Heart, Coffee, Briefcase } from "lucide-react"
 import { StatCard } from "@/components/ui/stat-card"
 import { ModernCard } from "@/components/ui/modern-card"
 import { ActionButton } from "@/components/ui/action-button"
@@ -120,18 +120,25 @@ export default function EmployeeDashboard() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <StatCard
-            title="Sick Leaves"
-            value={`${user?.sick_leave_balance} / 7`}
-            subtitle="Available"
-            icon={<AlertCircle size={24} />}
+            title="Sick Leave"
+            value={user?.sick_leave_balance || 0}
+            subtitle="Days Available"
+            icon={<Heart className="text-orange-600" size={24} />}
             color="orange"
           />
           <StatCard
-            title="Casual Leaves"
-            value={`${user?.casual_leave_balance} / 7`}
-            subtitle="Available"
-            icon={<Calendar size={24} />}
+            title="Casual Leave"
+            value={user?.casual_leave_balance || 0}
+            subtitle="Days Available"
+            icon={<Coffee className="text-blue-600" size={24} />}
             color="blue"
+          />
+          <StatCard
+            title="Work From Home"
+            value={user?.work_from_home_balance || 0}
+            subtitle="Days Available"
+            icon={<Briefcase className="text-purple-600" size={24} />} // Using Briefcase or similar
+            color="purple"
           />
           <StatCard
             title="Medical Leaves"

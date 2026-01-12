@@ -1,15 +1,16 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Check, X, Calendar, AlertCircle, FileText, User, LogOut } from "lucide-react" // Icons
+import { Check, X, Calendar, AlertCircle, FileText, Eye } from "lucide-react" // Icons
 import { ActionButton } from "@/components/ui/action-button"
 import { ModernCard } from "@/components/ui/modern-card"
-import { Badge } from "@/components/ui/badge" // Assuming we have Badge or I'll use simple span
+import { Modal } from "@/components/ui/modal"
 
 export default function ManagerDashboard() {
   const [leaves, setLeaves] = useState([])
   const [loading, setLoading] = useState(true)
   const [processingId, setProcessingId] = useState<number | null>(null)
+  const [selectedLeave, setSelectedLeave] = useState<any>(null) // For Modal
 
   useEffect(() => {
     fetchLeaves()
@@ -46,6 +47,7 @@ export default function ManagerDashboard() {
       if (res.ok) {
         // Remove from list
         setLeaves(prev => prev.filter((l: any) => l.id !== id))
+        setSelectedLeave(null) // Close modal if open
         alert(`Leave request ${status} successfully.`)
       } else {
         const err = await res.json()
@@ -57,6 +59,10 @@ export default function ManagerDashboard() {
     } finally {
       setProcessingId(null)
     }
+  }
+
+  const openReviewModal = (leave: any) => {
+    setSelectedLeave(leave)
   }
 
   const handleLogout = () => {
@@ -103,8 +109,9 @@ export default function ManagerDashboard() {
                         <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide
                           ${leave.leave_type === 'sick' ? 'bg-orange-100 text-orange-700' :
                             leave.leave_type === 'medical' ? 'bg-pink-100 text-pink-700' :
-                              'bg-indigo-100 text-indigo-700'}`}>
-                          {leave.leave_type}
+                              leave.leave_type === 'work_from_home' ? 'bg-blue-100 text-blue-700' :
+                                'bg-indigo-100 text-indigo-700'}`}>
+                          {leave.leave_type.replace(/_/g, ' ')}
                         </span>
                         {leave.is_sandwich && (
                           <span className="bg-yellow-100 text-yellow-800 text-xs px-3 py-1 rounded-full border border-yellow-200 font-bold flex items-center">
@@ -124,7 +131,7 @@ export default function ManagerDashboard() {
                       </div>
                       <div className="flex items-start text-sm text-secondary-700">
                         <FileText size={18} className="mr-3 mt-0.5 text-secondary-400" />
-                        <p className="italic">"{leave.reason}"</p>
+                        <p className="italic line-clamp-1">"{leave.reason}"</p>
                       </div>
                     </div>
 
@@ -137,23 +144,31 @@ export default function ManagerDashboard() {
 
                   <div className="flex flex-row md:flex-col gap-3 min-w-[160px] border-t md:border-t-0 md:border-l border-secondary-100 pt-4 md:pt-0 md:pl-6">
                     <ActionButton
-                      variant="success"
+                      variant="secondary"
                       fullWidth
-                      onClick={() => handleAction(leave.id, 'approved')}
-                      disabled={processingId === leave.id}
-                      className="shadow-md"
+                      onClick={() => openReviewModal(leave)}
+                      className="bg-white border-secondary-200"
                     >
-                      <Check size={16} /> Approve
+                      <Eye size={16} className="mr-2" /> Review
                     </ActionButton>
-                    <ActionButton
-                      variant="danger"
-                      fullWidth
-                      onClick={() => handleAction(leave.id, 'rejected')}
-                      disabled={processingId === leave.id}
-                      className="shadow-md"
-                    >
-                      <X size={16} /> Reject
-                    </ActionButton>
+                    <div className="flex gap-2 w-full">
+                      <ActionButton
+                        variant="success"
+                        fullWidth
+                        onClick={() => handleAction(leave.id, 'approved')}
+                        disabled={processingId === leave.id}
+                      >
+                        <Check size={16} />
+                      </ActionButton>
+                      <ActionButton
+                        variant="danger"
+                        fullWidth
+                        onClick={() => handleAction(leave.id, 'rejected')}
+                        disabled={processingId === leave.id}
+                      >
+                        <X size={16} />
+                      </ActionButton>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -161,6 +176,102 @@ export default function ManagerDashboard() {
           )}
         </div>
       )}
+
+      {/* Review Modal */}
+      <Modal
+        isOpen={!!selectedLeave}
+        onClose={() => setSelectedLeave(null)}
+        title="Review Leave Application"
+        size="lg"
+      >
+        {selectedLeave && (
+          <div className="space-y-6">
+            {/* User Header in Modal */}
+            <div className="flex items-center space-x-4 pb-6 border-b border-secondary-100">
+              <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold text-2xl">
+                {selectedLeave.employee?.name?.[0]}
+              </div>
+              <div>
+                <h4 className="text-xl font-bold text-secondary-900">{selectedLeave.employee?.name}</h4>
+                <p className="text-secondary-500">{selectedLeave.employee?.department || 'Employee'} • ID: {selectedLeave.employee?.employee_id || 'N/A'}</p>
+              </div>
+            </div>
+
+            {/* Details Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <h5 className="font-bold text-secondary-900 text-sm uppercase tracking-wide">Request Details</h5>
+                <div className="bg-secondary-50 p-4 rounded-xl space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-secondary-500">Dates</span>
+                    <span className="font-bold text-secondary-900 text-right">
+                      {new Date(selectedLeave.start_date).toLocaleDateString()} — {new Date(selectedLeave.end_date).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-secondary-500">Duration</span>
+                    <span className="font-bold text-secondary-900">{selectedLeave.total_days} Day(s)</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-secondary-500">Type</span>
+                    <span className="capitalize font-bold text-primary-600">{selectedLeave.leave_type.replace('_', ' ')}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h5 className="font-bold text-secondary-900 text-sm uppercase tracking-wide">Leave Balances</h5>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-orange-50 p-3 rounded-xl border border-orange-100 text-center">
+                    <span className="block text-2xl font-bold text-orange-600">{selectedLeave.employee?.sick_leave_balance}</span>
+                    <span className="text-xs text-orange-800 font-medium">Sick Leave</span>
+                  </div>
+                  <div className="bg-blue-50 p-3 rounded-xl border border-blue-100 text-center">
+                    <span className="block text-2xl font-bold text-blue-600">{selectedLeave.employee?.casual_leave_balance}</span>
+                    <span className="text-xs text-blue-800 font-medium">Casual Leave</span>
+                  </div>
+                  <div className="bg-purple-50 p-3 rounded-xl border border-purple-100 text-center col-span-2">
+                    <span className="block text-2xl font-bold text-purple-600">{selectedLeave.employee?.work_from_home_balance}</span>
+                    <span className="text-xs text-purple-800 font-medium">Work From Home</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Full Reason */}
+            <div className="space-y-2">
+              <h5 className="font-bold text-secondary-900 text-sm uppercase tracking-wide">Reason for Leave</h5>
+              <div className="bg-white border border-secondary-200 p-4 rounded-xl text-secondary-700 leading-relaxed">
+                {selectedLeave.reason}
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex gap-4 pt-6 mt-6 border-t border-secondary-100">
+              <ActionButton
+                variant="success"
+                size="lg"
+                fullWidth
+                onClick={() => handleAction(selectedLeave.id, 'approved')}
+                disabled={processingId === selectedLeave.id}
+                className="flex-1"
+              >
+                <Check size={20} className="mr-2" /> Approve Request
+              </ActionButton>
+              <ActionButton
+                variant="danger"
+                size="lg"
+                fullWidth
+                onClick={() => handleAction(selectedLeave.id, 'rejected')}
+                disabled={processingId === selectedLeave.id}
+                className="flex-1"
+              >
+                <X size={20} className="mr-2" /> Reject Request
+              </ActionButton>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   )
 }

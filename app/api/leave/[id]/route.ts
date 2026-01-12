@@ -60,6 +60,45 @@ export async function PATCH(
                         where: { id: employeeId },
                         data: { casual_leave_balance: { decrement: days } }
                     });
+                } else if (leaveType === 'work_from_home') {
+                    // 1. Deduct Balance
+                    await tx.user.update({
+                        where: { id: employeeId },
+                        data: { work_from_home_balance: { decrement: days } }
+                    });
+
+                    // 2. Mark as Present in Attendance Table for each day
+                    // Loop from start_date to end_date
+                    const startDate = new Date(leave.start_date);
+                    const endDate = new Date(leave.end_date);
+
+                    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                        const dateToProcess = new Date(d);
+
+                        await tx.attendance.upsert({
+                            where: {
+                                employee_id_date: {
+                                    employee_id: employeeId,
+                                    date: dateToProcess
+                                }
+                            },
+                            update: {
+                                status: 'present',
+                                notes: 'Work From Home - Auto Marked',
+                                check_in: new Date(dateToProcess.setHours(9, 0, 0, 0)), // Optional: Set pseudo check-in
+                                check_out: new Date(dateToProcess.setHours(17, 0, 0, 0)) // Optional: Set pseudo check-out
+                            },
+                            create: {
+                                employee_id: employeeId,
+                                date: dateToProcess,
+                                status: 'present',
+                                notes: 'Work From Home - Auto Marked',
+                                check_in: new Date(dateToProcess.setHours(9, 0, 0, 0)),
+                                check_out: new Date(dateToProcess.setHours(17, 0, 0, 0))
+                            }
+                        });
+                    }
+
                 } else if (leaveType === 'medical') {
                     await tx.user.update({
                         where: { id: employeeId },

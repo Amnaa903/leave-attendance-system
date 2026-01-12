@@ -58,6 +58,8 @@ export async function validateLeaveQuota(employeeId: number, type: string, daysR
     // Medical usually has separate rules or unlimited if valid, but let's assume balance check if needed
     if (type === 'medical') return user.medical_leave_balance >= daysRequested;
 
+    if (type === 'work_from_home') return user.work_from_home_balance >= daysRequested;
+
     return false;
 }
 
