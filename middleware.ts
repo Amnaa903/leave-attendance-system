@@ -3,26 +3,31 @@ import type { NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
-  
-  // Login page allow karo
-  if (path === '/login' || path === '/') {
-    return NextResponse.next();
-  }
-  
-  // API calls allow karo
-  if (path.startsWith('/api/')) {
+
+  // 1. Public Paths: Login and Root
+  if (path === '/login' || path === '/' || path === '/api/auth/login') {
     return NextResponse.next();
   }
 
-  // Check token
+  // 2. Validate Token
   const token = request.cookies.get('token')?.value;
-  
-  // Agar token nahi hai to login page bhejo
+
   if (!token) {
+    // Redirect to login for pages, JSON 401 for API
+    if (path.startsWith('/api/')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // Agar token hai to aage jane do
+  // 3. Optional: Decode token to check role (if accessing /admin)
+  // Note: Middleware runs on Edge runtime, so we can't use 'jsonwebtoken' library directly if it relies on Node 'crypto'.
+  // We'll rely on the API routes to do the heavy verification, but here we check existence.
+  // For stricter edge-compatible JWT verification, we would need 'jose' library.
+  // For now, simpler check: if trying to access admin pages, assume API will catch if token is invalid,
+  // but let's check if the path is /admin and maybe hint at role?
+  // We will assume the API route handles the deep security validation.
+
   return NextResponse.next();
 }
 

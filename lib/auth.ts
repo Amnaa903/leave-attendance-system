@@ -20,9 +20,15 @@ export function generateToken(user: any): string {
 
 export function verifyToken(token: string): any {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    console.log('✅ Token verified successfully');
-    console.log('🔍 Decoded token:', decoded);
+    // Debug logging to see exactly what we are verifying
+    if (!token) throw new Error("Token is empty");
+
+    // Check if token has quotes or whitespace
+    const cleanToken = token.trim().replace(/^"|"$/g, '');
+
+    console.log(`🔐 Verifying token (length: ${cleanToken.length}): ${cleanToken.substring(0, 10)}...`);
+
+    const decoded = jwt.verify(cleanToken, JWT_SECRET);
     return decoded;
   } catch (error: any) {
     console.error('❌ Token verification failed:', error.message);
@@ -35,4 +41,14 @@ export function verifyToken(token: string): any {
 export function verifyPassword(plainText: string, hashed: string): boolean {
   console.log(`🔐 Password check: ${plainText} vs ${hashed}`);
   return plainText === hashed; // Simple comparison for dev
+}
+
+import { cookies } from 'next/headers';
+
+export async function getUser(request: Request) { // Request param kept for compatibility but unused for cookies
+  const cookieStore = cookies();
+  const token = cookieStore.get('token')?.value;
+
+  if (!token) return null;
+  return verifyToken(token);
 }

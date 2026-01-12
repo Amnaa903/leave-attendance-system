@@ -3,32 +3,29 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id          Int      @id @default(autoincrement())
-  email       String   @unique
-  password    String
-  name        String
-  employee_id String?  @unique
-  role        String   @default("employee")
-  department  String?
-  position    String?
-  join_date   DateTime
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-
-  sick_leave_balance    Int @default(7)
-  casual_leave_balance  Int @default(7)
-  medical_leave_balance Int @default(0)
-
-  // Relations with names
-  leaves         Leave[]      @relation("EmployeeLeaves")
-  approvedLeaves Leave[]      @relation("ApprovedLeaves")
-  attendances    Attendance[]
-  penalties      Penalty[]
+  id                    Int          @id @default(autoincrement())
+  email                 String       @unique
+  password              String
+  name                  String
+  employee_id           String?      @unique
+  role                  String       @default("employee")
+  department            String?
+  position              String?
+  join_date             DateTime
+  created_at            DateTime     @default(now())
+  updated_at            DateTime     @updatedAt
+  sick_leave_balance    Int          @default(7)
+  casual_leave_balance  Int          @default(7)
+  medical_leave_balance Int          @default(0)
+  attendances           Attendance[]
+  approvedLeaves        Leave[]      @relation("ApprovedLeaves")
+  leaves                Leave[]      @relation("EmployeeLeaves")
+  penalties             Penalty[]
 
   @@map("users")
 }
@@ -36,26 +33,22 @@ model User {
 model Leave {
   id               Int       @id @default(autoincrement())
   employee_id      Int
-  leave_type       String // "sick", "casual", "medical"
+  leave_type       String
   start_date       DateTime
   end_date         DateTime
   total_days       Int
   reason           String?
   proof_url        String?
-  status           String    @default("pending") // "pending", "approved", "rejected"
+  status           String    @default("pending")
   approved_by      Int?
   approved_at      DateTime?
   rejection_reason String?
   created_at       DateTime  @default(now())
   updated_at       DateTime  @updatedAt
-
-  // Additional fields
-  is_sandwich Boolean @default(false)
-  doctor_note Boolean @default(false)
-
-  // Relations with different names
-  employee User  @relation("EmployeeLeaves", fields: [employee_id], references: [id])
-  approver User? @relation("ApprovedLeaves", fields: [approved_by], references: [id])
+  is_sandwich      Boolean   @default(false)
+  doctor_note      Boolean   @default(false)
+  approver         User?     @relation("ApprovedLeaves", fields: [approved_by], references: [id])
+  employee         User      @relation("EmployeeLeaves", fields: [employee_id], references: [id])
 
   @@map("leaves")
 }
@@ -66,14 +59,13 @@ model Attendance {
   date         DateTime
   check_in     DateTime?
   check_out    DateTime?
-  status       String    @default("present") // "present", "absent", "half_day"
+  status       String    @default("present")
   hours_worked Float?
   is_late      Boolean   @default(false)
   notes        String?
   created_at   DateTime  @default(now())
   updated_at   DateTime  @updatedAt
-
-  employee User @relation(fields: [employee_id], references: [id])
+  employee     User      @relation(fields: [employee_id], references: [id])
 
   @@unique([employee_id, date])
   @@map("attendances")
@@ -88,8 +80,7 @@ model Penalty {
   applied_date DateTime
   status       String   @default("active")
   created_at   DateTime @default(now())
-
-  employee User @relation(fields: [employee_id], references: [id])
+  employee     User     @relation(fields: [employee_id], references: [id])
 
   @@map("penalties")
 }

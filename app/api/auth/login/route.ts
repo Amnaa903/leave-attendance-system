@@ -1,45 +1,63 @@
 import { NextResponse } from 'next/server';
-
-// Simple user database
-const users = [
-  { id: 1, email: 'admin@company.com', name: 'Admin', password: 'admin123', role: 'ADMIN', employee_id: 'ADM001' },
-  { id: 2, email: 'manager@company.com', name: 'Manager', password: 'manager123', role: 'MANAGER', employee_id: 'MGR001' },
-  { id: 3, email: 'employee@company.com', name: 'Employee', password: 'employee123', role: 'EMPLOYEE', employee_id: 'EMP001' },
-];
+import { prisma } from '@/lib/prisma';
+import { generateToken, verifyPassword } from '@/lib/auth'; // Import helper
+import { compare } from 'bcryptjs'; // Use bcrypt for real pw check
 
 export async function POST(request: Request) {
   try {
     const { email, password } = await request.json();
-    
-    // Find user
-    const user = users.find(u => u.email === email && u.password === password);
-    
+
+    // 1. Find user in Real DB
+    const user = await prisma.user.findUnique({
+      where: { email }
+    });
+
+    // 2. Check Password
     if (!user) {
       return NextResponse.json({ error: 'Wrong email or password' }, { status: 401 });
     }
 
-    // Simple token (just user info encoded)
-    const token = Buffer.from(JSON.stringify(user)).toString('base64');
-    
-    // Create response
+    // Attempt bcrypt compare first, fallback to simple for seeded dev users if needed
+    let pwMatch = false;
+    try {
+      pwMatch = await compare(password, user.password);
+    } catch (e) {
+      // Fallback for simple passwords if bcrypt fails (dev only)
+      pwMatch = user.password === password;
+    }
+
+    if (!pwMatch) {
+      return NextResponse.json({ error: 'Wrong email or password' }, { status: 401 });
+    }
+
+    // 3. Generate REAL JWT
+    const token = generateToken(user);
+
+    // 4. Create response
+    const { password: _, ...userWithoutPassword } = user;
     const response = NextResponse.json({
       success: true,
-      user: user,
+      user: userWithoutPassword,
       token: token
     });
 
-    // Set cookie - SIMPLE VERSION
+    // 5. Set Cookie
     response.cookies.set('token', token, {
-      httpOnly: false, // false kar do
-      secure: false, // false for localhost
-      sameSite: 'lax', // lax use karo
+      httpOnly: false, // Keep false for dev convenience if needed, ideally true in prod
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7, // 7 days
       path: '/',
     });
 
     return response;
-    
-  } catch (error) {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+
+  } catch (error: any) {
+    console.error("Login Error:", error);
+    return NextResponse.json({
+      error: 'Server error',
+      details: error.message,
+      stack: error.stack
+    }, { status: 500 });
   }
 }

@@ -8,6 +8,9 @@ interface ActionButtonProps {
   size?: "sm" | "md" | "lg"
   fullWidth?: boolean
   onClick?: () => void
+  type?: "button" | "submit" | "reset"
+  disabled?: boolean
+  className?: string
 }
 
 export function ActionButton({
@@ -16,12 +19,15 @@ export function ActionButton({
   size = "md",
   fullWidth = false,
   onClick,
+  type = "button",
+  disabled = false,
+  className = "",
 }: ActionButtonProps) {
   const variantClasses = {
-    primary: "bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow-md",
-    secondary: "bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200",
+    primary: "bg-primary-600 hover:bg-primary-700 text-white shadow-sm hover:shadow-md",
+    secondary: "bg-white hover:bg-secondary-50 text-secondary-700 border border-secondary-200 card-hover",
     success: "bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm hover:shadow-md",
-    danger: "bg-rose-600 hover:bg-rose-700 text-white shadow-sm hover:shadow-md",
+    danger: "bg-danger hover:bg-red-700 text-white shadow-sm hover:shadow-md",
   }
 
   const sizeClasses = {
@@ -32,12 +38,16 @@ export function ActionButton({
 
   return (
     <button
+      type={type}
       onClick={onClick}
+      disabled={disabled}
       className={`
-        inline-flex items-center justify-center space-x-2 font-medium rounded-lg transition-all
+        inline-flex items-center justify-center space-x-2 font-medium rounded-xl transition-all duration-200
         ${variantClasses[variant]}
         ${sizeClasses[size]}
         ${fullWidth ? "w-full" : ""}
+        ${disabled ? "opacity-50 cursor-not-allowed transform-none shadow-none" : "active:scale-95"}
+        ${className}
       `}
     >
       {children}

@@ -1,29 +1,58 @@
 "use client"
-import { LogOut, Calendar, Clock, TrendingUp, Eye } from "lucide-react"
+
+import { useState, useEffect } from "react"
+import { Calendar, Clock, AlertCircle, FileText, CheckCircle, XCircle, LogOut } from "lucide-react"
 import { StatCard } from "@/components/ui/stat-card"
-import { ProgressBar } from "@/components/ui/progress-bar"
-import { Badge } from "@/components/ui/badge"
 import { ModernCard } from "@/components/ui/modern-card"
 import { ActionButton } from "@/components/ui/action-button"
 
 export default function EmployeeDashboard() {
-  const leaveBalance = {
-    sick: { total: 7, used: 2, remaining: 5 },
-    casual: { total: 7, used: 3, remaining: 4 },
-    earned: { total: 0, used: 0, remaining: 0 },
+  const [user, setUser] = useState<any>(null)
+  const [attendance, setAttendance] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [actionLoading, setActionLoading] = useState(false)
+
+  // Fetch data on mount
+  const fetchData = async () => {
+    try {
+      const res = await fetch('/api/user/me')
+      if (res.ok) {
+        const data = await res.json()
+        setUser(data.user)
+        setAttendance(data.attendance)
+      }
+    } catch (error) {
+      console.error("Failed to load profile", error)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const recentLeaves = [
-    { id: 1, type: "Sick", date: "Jan 5-6, 2024", status: "Approved", days: 2 },
-    { id: 2, type: "Casual", date: "Dec 20, 2023", status: "Approved", days: 1 },
-    { id: 3, type: "Casual", date: "Dec 15, 2023", status: "Approved", days: 1 },
-  ]
+  useEffect(() => {
+    fetchData()
+  }, [])
 
-  const attendance = {
-    present: 18,
-    absent: 2,
-    late: 1,
-    percentage: 90,
+  const handleAttendance = async (action: 'check_in' | 'check_out') => {
+    setActionLoading(true)
+    try {
+      const res = await fetch('/api/attendance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action })
+      })
+
+      if (res.ok) {
+        await fetchData() // Refresh state
+        alert(`Successfully ${action === 'check_in' ? 'Checked In' : 'Checked Out'}!`)
+      } else {
+        const err = await res.json()
+        alert(err.error || "Action failed")
+      }
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setActionLoading(false)
+    }
   }
 
   const handleLogout = () => {
@@ -31,211 +60,103 @@ export default function EmployeeDashboard() {
     window.location.href = "/login"
   }
 
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center bg-gray-50">Loading...</div>
+  }
+
+  const isCheckedIn = !!attendance?.check_in && !attendance?.check_out
+  const isCheckedOut = !!attendance?.check_out
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30">
-      {/* Navigation */}
-      <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">LS</span>
-              </div>
-              <h1 className="text-xl font-bold text-gray-900">LeaveSync</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">EMP001</span>
-              <ActionButton variant="danger" size="sm" onClick={handleLogout}>
-                <LogOut size={16} />
-                Logout
-              </ActionButton>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8 flex justify-between items-start">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900">Welcome back!</h1>
-            <p className="text-gray-600 mt-2">Here's your leave and attendance summary</p>
-          </div>
-          <div className="text-right">
-            <div className="text-sm text-gray-600 mb-1">Status</div>
-            <Badge label="Present • Checked In" variant="success" />
-          </div>
+    <div className="space-y-8">
+      {/* Welcome & Attendance Section */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="md:col-span-2 flex flex-col justify-center">
+          <h1 className="text-4xl font-heading font-bold text-secondary-900 mb-2">
+            Welcome back, {user?.name?.split(' ')[0]} 👋
+          </h1>
+          <p className="text-lg text-secondary-500">Here's your activity overview for today.</p>
         </div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        {/* Attendance Action Card */}
+        <div className="bg-white/60 backdrop-blur-md rounded-2xl shadow-glass border border-white/50 p-6 flex flex-col items-center justify-center text-center">
+          <p className="text-sm font-bold text-secondary-500 mb-4 uppercase tracking-widest">
+            {isCheckedOut ? "Shift Completed" : isCheckedIn ? "Active Shift" : "Ready to Start?"}
+          </p>
+
+          {isCheckedOut ? (
+            <div className="flex items-center space-x-2 text-emerald-600 bg-emerald-50 px-4 py-2 rounded-lg border border-emerald-100">
+              <CheckCircle size={20} />
+              <span className="font-bold">Checked Out at {new Date(attendance.check_out).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+            </div>
+          ) : (
+            <ActionButton
+              onClick={() => handleAttendance(isCheckedIn ? 'check_out' : 'check_in')}
+              variant={isCheckedIn ? 'danger' : 'success'}
+              size="lg"
+              fullWidth
+              disabled={actionLoading}
+              className="shadow-lg transform hover:scale-105 transition-all"
+            >
+              <Clock className="mr-2" />
+              {isCheckedIn ? 'Check Out' : 'Check In Now'}
+            </ActionButton>
+          )}
+
+          {isCheckedIn && (
+            <div className="mt-4 flex items-center justify-center text-xs text-secondary-400 bg-secondary-50 px-3 py-1 rounded-full">
+              <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+              Checked in at: {new Date(attendance.check_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              {attendance.is_late && <span className="text-red-500 font-bold ml-1">(Late)</span>}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Stats Grid */}
+      <div>
+        <h2 className="text-lg font-bold text-secondary-900 mb-4 flex items-center">
+          <Calendar className="mr-2 text-primary-500" size={20} /> Leave Balance
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <StatCard
-            title="Sick Leave"
-            value={leaveBalance.sick.remaining}
-            subtitle={`of ${leaveBalance.sick.total} days`}
+            title="Sick Leaves"
+            value={`${user?.sick_leave_balance} / 7`}
+            subtitle="Available"
+            icon={<AlertCircle size={24} />}
+            color="orange"
+          />
+          <StatCard
+            title="Casual Leaves"
+            value={`${user?.casual_leave_balance} / 7`}
+            subtitle="Available"
+            icon={<Calendar size={24} />}
             color="blue"
-            icon={<Calendar size={24} />}
           />
           <StatCard
-            title="Casual Leave"
-            value={leaveBalance.casual.remaining}
-            subtitle={`of ${leaveBalance.casual.total} days`}
-            color="green"
-            icon={<Calendar size={24} />}
-          />
-          <StatCard
-            title="Attendance"
-            value={`${attendance.percentage}%`}
-            subtitle="This month"
-            color="cyan"
-            icon={<Clock size={24} />}
-          />
-          <StatCard
-            title="Leaves Taken"
-            value={leaveBalance.sick.used + leaveBalance.casual.used}
-            subtitle="This year"
-            color="purple"
-            icon={<TrendingUp size={24} />}
+            title="Medical Leaves"
+            value={`${user?.medical_leave_balance}`}
+            subtitle="Taken this year"
+            icon={<FileText size={24} />}
+            color="pink"
           />
         </div>
+      </div>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Leave Balance Details */}
-            <ModernCard title="Leave Balance" subtitle="Detailed breakdown of your leave quota">
-              <div className="space-y-6">
-                <ProgressBar
-                  label="Sick Leave"
-                  value={leaveBalance.sick.used}
-                  max={leaveBalance.sick.total}
-                  color="blue"
-                />
-                <ProgressBar
-                  label="Casual Leave"
-                  value={leaveBalance.casual.used}
-                  max={leaveBalance.casual.total}
-                  color="green"
-                />
-              </div>
-              <div className="mt-6 pt-6 border-t border-gray-100">
-                <ActionButton fullWidth variant="primary">
-                  <Calendar size={18} />
-                  Apply for New Leave
-                </ActionButton>
-              </div>
-            </ModernCard>
-
-            {/* Recent Leave History */}
-            <ModernCard title="Leave History" subtitle="Your recent leave applications">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-gray-100">
-                      <th className="text-left py-3 text-sm font-semibold text-gray-700">Type</th>
-                      <th className="text-left py-3 text-sm font-semibold text-gray-700">Date</th>
-                      <th className="text-left py-3 text-sm font-semibold text-gray-700">Duration</th>
-                      <th className="text-left py-3 text-sm font-semibold text-gray-700">Status</th>
-                      <th className="text-right py-3 text-sm font-semibold text-gray-700">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recentLeaves.map((leave) => (
-                      <tr key={leave.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                        <td className="py-4">
-                          <div className="flex items-center space-x-2">
-                            <div
-                              className={`w-3 h-3 rounded-full ${
-                                leave.type === "Sick" ? "bg-blue-500" : "bg-green-500"
-                              }`}
-                            ></div>
-                            <span className="text-sm font-medium">{leave.type}</span>
-                          </div>
-                        </td>
-                        <td className="py-4 text-sm text-gray-600">{leave.date}</td>
-                        <td className="py-4 text-sm text-gray-600">{leave.days} days</td>
-                        <td className="py-4">
-                          <Badge label={leave.status} variant={leave.status === "Approved" ? "success" : "info"} />
-                        </td>
-                        <td className="py-4 text-right">
-                          <button className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center space-x-1 ml-auto">
-                            <Eye size={16} />
-                            <span>View</span>
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </ModernCard>
-          </div>
-
-          {/* Right Column */}
-          <div className="space-y-8">
-            {/* Quick Actions */}
-            <ModernCard title="Quick Actions">
-              <div className="space-y-3">
-                <ActionButton fullWidth variant="primary" size="md">
-                  <Calendar size={18} />
-                  Apply Leave
-                </ActionButton>
-                <ActionButton fullWidth variant="secondary" size="md">
-                  <Clock size={18} />
-                  Mark Attendance
-                </ActionButton>
-                <ActionButton fullWidth variant="secondary" size="md">
-                  <Eye size={18} />
-                  View Reports
-                </ActionButton>
-              </div>
-            </ModernCard>
-
-            {/* Attendance Summary */}
-            <ModernCard title="Attendance Summary">
-              <div className="text-center mb-6">
-                <div className="text-5xl font-bold text-gray-900">{attendance.percentage}%</div>
-                <div className="text-sm text-gray-600 mt-2">This month</div>
-              </div>
-              <div className="space-y-3 border-t border-gray-100 pt-6">
-                <div className="flex justify-between">
-                  <span className="text-gray-700">Present</span>
-                  <span className="font-semibold text-gray-900">{attendance.present} days</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-700">Absent</span>
-                  <span className="font-semibold text-gray-900">{attendance.absent} days</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-700">Late Markings</span>
-                  <span className="font-semibold text-gray-900">{attendance.late}</span>
-                </div>
-              </div>
-            </ModernCard>
-
-            {/* Upcoming Holidays */}
-            <ModernCard title="Upcoming Holidays">
-              <div className="space-y-3">
-                {[
-                  { name: "Republic Day", date: "January 26", type: "Public Holiday", color: "blue" },
-                  { name: "Holi", date: "March 25", type: "Festival", color: "green" },
-                  { name: "Eid al-Fitr", date: "April 11", type: "Religious", color: "purple" },
-                ].map((holiday, idx) => (
-                  <div
-                    key={idx}
-                    className="p-3 rounded-lg bg-gray-50 border border-gray-100 hover:border-gray-200 transition-colors"
-                  >
-                    <div className="font-medium text-gray-900">{holiday.name}</div>
-                    <div className="text-sm text-gray-600">{holiday.date}</div>
-                    <div className="text-xs text-gray-500 mt-1">{holiday.type}</div>
-                  </div>
-                ))}
-              </div>
-            </ModernCard>
-          </div>
+      {/* Quick Actions */}
+      <div className="pt-4 border-t border-secondary-200">
+        <h2 className="text-lg font-bold text-secondary-900 mb-4">Quick Actions</h2>
+        <div className="flex space-x-4">
+          <ActionButton variant="primary" onClick={() => window.location.href = '/employee/leave/apply'} className="shadow-soft">
+            <Calendar size={18} />
+            Apply for Leave
+          </ActionButton>
+          <ActionButton variant="secondary" className="bg-white border-secondary-200">
+            <FileText size={18} />
+            View History
+          </ActionButton>
         </div>
-      </main>
+      </div>
     </div>
   )
 }

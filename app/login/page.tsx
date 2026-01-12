@@ -22,12 +22,13 @@ export default function LoginPage() {
       });
 
       const data = await res.json();
-      
+
       if (res.ok) {
         // Redirect based on role
-        if (data.user.role === 'ADMIN') {
+        const role = data.user.role.toUpperCase();
+        if (role === 'ADMIN') {
           window.location.href = '/admin/dashboard';
-        } else if (data.user.role === 'MANAGER') {
+        } else if (role === 'MANAGER') {
           window.location.href = '/manager/dashboard';
         } else {
           window.location.href = '/employee/dashboard';
@@ -54,13 +55,13 @@ export default function LoginPage() {
           <h1 className="text-3xl font-bold text-gray-900">Leave Management System</h1>
           <p className="mt-2 text-gray-600">Track leaves, manage attendance, and streamline HR processes</p>
         </div>
-        
+
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
             {error}
           </div>
         )}
-        
+
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
@@ -78,7 +79,7 @@ export default function LoginPage() {
               aria-label="Email address"
             />
           </div>
-          
+
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
               Password
@@ -95,7 +96,7 @@ export default function LoginPage() {
               aria-label="Password"
             />
           </div>
-          
+
           <button
             type="submit"
             disabled={loading}
@@ -115,7 +116,7 @@ export default function LoginPage() {
             )}
           </button>
         </form>
-        
+
         <div className="mt-8 pt-6 border-t border-gray-200">
           <p className="text-center text-gray-600 text-sm mb-4">
             Demo Credentials:
@@ -126,13 +127,13 @@ export default function LoginPage() {
               <div className="text-gray-600">admin@company.com</div>
               <div className="text-gray-600">Password: admin123</div>
             </div>
-            
+
             <div className="bg-gray-50 p-3 rounded-lg">
               <div className="font-medium text-gray-900 mb-1">Manager</div>
               <div className="text-gray-600">manager@company.com</div>
               <div className="text-gray-600">Password: manager123</div>
             </div>
-          
+
             <div className="bg-gray-50 p-3 rounded-lg">
               <div className="font-medium text-gray-900 mb-1">Employee</div>
               <div className="text-gray-600">employee@company.com</div>
