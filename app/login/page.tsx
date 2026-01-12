@@ -132,7 +132,7 @@ export default function LoginPage() {
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="block text-sm font-bold text-secondary-700" htmlFor="password">Password</label>
-                  <a href="#" className="text-xs font-bold text-primary-600 hover:text-primary-700">Forgot password?</a>
+                  <a href="/forgot-password" className="text-xs font-bold text-primary-600 hover:text-primary-700 transition-colors">Forgot password?</a>
                 </div>
                 <div className="relative group">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary-400 group-focus-within:text-primary-500 transition-colors" size={20} />

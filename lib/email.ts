@@ -39,5 +39,9 @@ export const EMAIL_TEMPLATES = {
     LEAVE_CREATED_MANAGER: (employeeName: string, type: string, days: number) => ({
         subject: `New Leave Request: ${employeeName}`,
         text: `${employeeName} has applied for ${days} days of ${type} leave.\n\nPlease review it in your dashboard.`
+    }),
+    PASSWORD_RESET: (name: string, resetLink: string) => ({
+        subject: "Password Reset Request",
+        text: `Hello ${name},\n\nYou requested a password reset. Please click the link below to set a new password:\n\n${resetLink}\n\nIf you did not request this, please ignore this email.\n\nBest,\nLeaveSync Team`
     })
 };
