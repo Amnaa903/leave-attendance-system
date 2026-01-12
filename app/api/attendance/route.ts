@@ -28,22 +28,47 @@ export async function POST(request: Request) {
             }
 
             const now = new Date();
-            // Calculate Late Status (Default 9:00 AM)
-            // We can also use 'calculateAttendancePenalty' here or just set the flag
-            // Let's set the flag and simple penalty calc
             const scheduledTime = "09:00";
-            const penalty = calculateAttendancePenalty(now, scheduledTime);
-            const isLate = penalty > 0;
+            const penaltyAmount = calculateAttendancePenalty(now, scheduledTime);
+            const isLate = penaltyAmount > 0;
 
-            attendance = await prisma.attendance.create({
-                data: {
-                    employee_id: user.id,
-                    date: today,
-                    check_in: now,
-                    status: 'present',
-                    is_late: isLate,
-                    notes
+            attendance = await prisma.$transaction(async (tx) => {
+                const att = await tx.attendance.create({
+                    data: {
+                        employee_id: user.id,
+                        date: today,
+                        check_in: now,
+                        status: 'present',
+                        is_late: isLate,
+                        notes
+                    }
+                });
+
+                if (isLate) {
+                    // Create Penalty record
+                    await tx.penalty.create({
+                        data: {
+                            employee_id: user.id,
+                            penalty_type: 'late_arrival',
+                            description: `Late arrival at ${now.toLocaleTimeString()}`,
+                            penalty_days: penaltyAmount,
+                            applied_date: today,
+                            status: 'active'
+                        }
+                    });
+
+                    // Deduct from balance
+                    await tx.user.update({
+                        where: { id: user.id },
+                        data: {
+                            casual_leave_balance: {
+                                decrement: penaltyAmount
+                            }
+                        }
+                    });
                 }
+
+                return att;
             });
 
             // Note: If penalty > 0, we should probably record it in the Penalty table too?

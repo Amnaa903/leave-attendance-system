@@ -60,7 +60,7 @@ export async function POST(request: Request) {
 export async function GET(request: Request) {
     try {
         const currentUser = await getUser(request);
-        if (!currentUser || currentUser.role !== 'admin') {
+        if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'manager')) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
         }
 

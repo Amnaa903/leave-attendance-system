@@ -1,11 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Clock, Users, Search } from "lucide-react"
+import { Clock, Users, Search, AlertCircle } from "lucide-react"
 import { ModernCard } from "@/components/ui/modern-card"
 
 interface AttendanceRecord {
     id: string
+    employee_id: number // Numeric ID from DB
     date: string
     check_in: string | null
     check_out: string | null
@@ -15,7 +16,7 @@ interface AttendanceRecord {
     employee: {
         name: string
         department: string
-        employee_id: string
+        employee_id: string // String ID like EMP-001
     }
 }
 
@@ -87,6 +88,7 @@ export default function ManagerAttendancePage() {
                                     <th className="py-4 px-4 text-sm font-semibold text-secondary-500 uppercase tracking-wider">Check In</th>
                                     <th className="py-4 px-4 text-sm font-semibold text-secondary-500 uppercase tracking-wider">Check Out</th>
                                     <th className="py-4 px-4 text-sm font-semibold text-secondary-500 uppercase tracking-wider">Hours</th>
+                                    <th className="py-4 px-4 text-sm font-semibold text-secondary-500 uppercase tracking-wider text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -118,6 +120,15 @@ export default function ManagerAttendancePage() {
                                         </td>
                                         <td className="py-4 px-4 text-secondary-600">
                                             {record.hours_worked ? `${record.hours_worked.toFixed(1)} hrs` : '-'}
+                                        </td>
+                                        <td className="py-4 px-4 text-right">
+                                            <button
+                                                onClick={() => window.location.href = `/manager/penalties?employee_id=${record.employee_id}`}
+                                                className="p-2 text-secondary-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                                title="Issue Penalty"
+                                            >
+                                                <AlertCircle size={18} />
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}

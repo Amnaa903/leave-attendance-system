@@ -9,7 +9,8 @@ import {
     LogOut,
     Menu,
     X,
-    Settings
+    Settings,
+    AlertCircle
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -40,6 +41,12 @@ export default function AppSidebar({ role }: SidebarProps) {
             href: '/admin/users',
             icon: Users,
             roles: ['ADMIN']
+        },
+        {
+            label: 'Penalties',
+            href: `/${role.toLowerCase()}/penalties`, // Dynamic href based on role
+            icon: AlertCircle,
+            roles: ['ADMIN', 'MANAGER', 'EMPLOYEE'] // Assuming all roles can view penalties
         },
         {
             label: 'Leave Requests',
@@ -91,23 +98,23 @@ export default function AppSidebar({ role }: SidebarProps) {
             {/* Sidebar Container */}
             <aside className={`
         fixed top-0 left-0 z-40 h-screen w-72 
-        bg-white/80 backdrop-blur-xl border-r border-secondary-200
+        bg-indigo-900 border-r border-indigo-800 text-white
         transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
                 {/* Logo Area */}
-                <div className="h-20 flex items-center px-8 border-b border-secondary-100">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-indigo-600 flex items-center justify-center mr-3">
-                        <span className="text-white font-bold text-lg">L</span>
+                <div className="h-20 flex items-center px-8 border-b border-indigo-800">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-400 to-indigo-200 flex items-center justify-center mr-3">
+                        <span className="text-indigo-900 font-bold text-lg">L</span>
                     </div>
-                    <span className="font-heading font-bold text-2xl text-secondary-900 tracking-tight">
+                    <span className="font-heading font-bold text-2xl text-white tracking-tight">
                         LeaveSync
                     </span>
                 </div>
 
                 {/* Navigation */}
                 <nav className="p-4 space-y-2 mt-4">
-                    <div className="px-4 text-xs font-semibold text-secondary-400 uppercase tracking-wider mb-2">
+                    <div className="px-4 text-xs font-semibold text-indigo-300 uppercase tracking-wider mb-2">
                         Menu
                     </div>
 
@@ -122,15 +129,15 @@ export default function AppSidebar({ role }: SidebarProps) {
                                 className={`
                   flex items-center px-4 py-3 rounded-xl transition-all duration-200 group
                   ${isActive
-                                        ? 'bg-primary-50 text-primary-600 shadow-sm font-medium'
-                                        : 'text-secondary-600 hover:bg-secondary-50 hover:text-secondary-900'
+                                        ? 'bg-indigo-800 text-white shadow-sm font-medium'
+                                        : 'text-indigo-100 hover:bg-indigo-800 hover:text-white'
                                     }
                 `}
                             >
-                                <Icon size={20} className={`mr-3 ${isActive ? 'text-primary-600' : 'text-secondary-400 group-hover:text-secondary-600'}`} />
+                                <Icon size={20} className={`mr-3 ${isActive ? 'text-indigo-300' : 'text-indigo-300 group-hover:text-white'}`} />
                                 <span>{item.label}</span>
                                 {isActive && (
-                                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]" />
+                                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-400 shadow-[0_0_8px_rgba(129,140,248,0.5)]" />
                                 )}
                             </Link>
                         );
@@ -138,20 +145,20 @@ export default function AppSidebar({ role }: SidebarProps) {
                 </nav>
 
                 {/* Footer / User Profile */}
-                <div className="absolute bottom-0 w-full p-4 border-t border-secondary-100 bg-secondary-50/50">
+                <div className="absolute bottom-0 w-full p-4 border-t border-indigo-800 bg-indigo-950/30">
                     <div className="flex items-center justify-between px-4 py-2">
                         <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold border border-indigo-200">
+                            <div className="w-10 h-10 rounded-full bg-indigo-800 flex items-center justify-center text-indigo-200 font-bold border border-indigo-700">
                                 {role.charAt(0)}
                             </div>
                             <div>
-                                <p className="text-sm font-bold text-secondary-900 capitalize">{role.toLowerCase()}</p>
-                                <p className="text-xs text-secondary-500">View Profile</p>
+                                <p className="text-sm font-bold text-white capitalize">{role.toLowerCase()}</p>
+                                <p className="text-xs text-indigo-300">View Profile</p>
                             </div>
                         </div>
                         <button
                             onClick={handleLogout}
-                            className="p-2 text-secondary-400 hover:text-danger hover:bg-red-50 rounded-lg transition-colors"
+                            className="p-2 text-indigo-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
                             title="Logout"
                         >
                             <LogOut size={20} />

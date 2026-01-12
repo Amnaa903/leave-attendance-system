@@ -80,65 +80,98 @@ export default function ManagerDashboard() {
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-secondary-400 animate-pulse">Loading requests...</div>
+        <div className="flex flex-col items-center justify-center py-24 space-y-4">
+          <div className="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
+          <p className="text-secondary-400 font-bold animate-pulse">Fetching requests...</p>
+        </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-6">
           {leaves.length === 0 ? (
-            <ModernCard title="All Caught Up!">
-              <div className="text-center py-12 text-secondary-400 flex flex-col items-center">
-                <div className="w-16 h-16 bg-secondary-100 rounded-full flex items-center justify-center mb-4">
-                  <FileText className="text-secondary-300" size={32} />
+            <ModernCard title="All Caught Up!" color="indigo">
+              <div className="text-center py-16 text-secondary-400 flex flex-col items-center">
+                <div className="w-20 h-20 bg-indigo-50 rounded-3xl flex items-center justify-center mb-6 shadow-inner">
+                  <FileText className="text-indigo-300" size={40} />
                 </div>
-                <p>No pending leave requests at the moment.</p>
+                <h3 className="text-xl font-bold text-secondary-900 mb-2">No pending requests</h3>
+                <p className="font-medium text-secondary-500 max-w-xs mx-auto">You've cleared all the applications. Check back later for new ones.</p>
               </div>
             </ModernCard>
           ) : (
             leaves.map((leave: any) => (
-              <div key={leave.id} className="bg-white rounded-xl border border-secondary-200 shadow-soft p-6 transition-all hover:shadow-lg card-hover">
+              <div key={leave.id} className="bg-white rounded-2xl border border-secondary-200 shadow-soft p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group relative overflow-hidden">
+                {/* Status Indicator Bar */}
+                <div className={`absolute top-0 left-0 bottom-0 w-1.5 
+                  ${leave.leave_type === 'sick' ? 'bg-orange-500' :
+                    leave.leave_type === 'medical' ? 'bg-pink-500' :
+                      leave.leave_type === 'work_from_home' ? 'bg-purple-500' :
+                        'bg-indigo-500'}`}
+                />
+
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
                   <div className="flex-1">
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold text-lg border-2 border-primary-50">
-                        {leave.employee?.name?.[0] || 'U'}
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="relative">
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-100 to-indigo-50 flex items-center justify-center text-indigo-700 font-extrabold text-xl border border-indigo-200 shadow-sm">
+                          {leave.employee?.name?.[0] || 'U'}
+                        </div>
+                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white rounded-full"></div>
                       </div>
                       <div>
-                        <h3 className="font-bold text-lg text-secondary-900">{leave.employee?.name}</h3>
-                        <p className="text-sm text-secondary-500 font-medium">{leave.employee?.department || 'Employee'}</p>
+                        <h3 className="font-extrabold text-xl text-secondary-900">{leave.employee?.name}</h3>
+                        <p className="text-sm text-secondary-500 font-bold uppercase tracking-wider">{leave.employee?.department || 'Employee'}</p>
                       </div>
-                      <div className="ml-auto md:ml-4 flex gap-2">
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide
-                          ${leave.leave_type === 'sick' ? 'bg-orange-100 text-orange-700' :
-                            leave.leave_type === 'medical' ? 'bg-pink-100 text-pink-700' :
-                              leave.leave_type === 'work_from_home' ? 'bg-blue-100 text-blue-700' :
-                                'bg-indigo-100 text-indigo-700'}`}>
+                      <div className="ml-auto md:ml-4 flex items-center gap-3">
+                        <span className={`px-4 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-widest border
+                          ${leave.leave_type === 'sick' ? 'bg-orange-50 text-orange-700 border-orange-100' :
+                            leave.leave_type === 'medical' ? 'bg-pink-50 text-pink-700 border-pink-100' :
+                              leave.leave_type === 'work_from_home' ? 'bg-purple-50 text-purple-700 border-purple-100' :
+                                'bg-indigo-50 text-indigo-700 border-indigo-100'}`}>
                           {leave.leave_type.replace(/_/g, ' ')}
                         </span>
                         {leave.is_sandwich && (
-                          <span className="bg-yellow-100 text-yellow-800 text-xs px-3 py-1 rounded-full border border-yellow-200 font-bold flex items-center">
-                            <AlertCircle size={12} className="mr-1" /> Sandwich
+                          <span className="bg-amber-50 text-amber-700 text-[10px] px-3 py-1 rounded-full border border-amber-100 font-extrabold flex items-center shadow-sm">
+                            <AlertCircle size={12} className="mr-1.5 text-amber-500" /> SANDWICH
                           </span>
                         )}
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 bg-secondary-50/80 p-5 rounded-xl border border-secondary-100">
-                      <div className="flex items-center text-sm text-secondary-700">
-                        <Calendar size={18} className="mr-3 text-secondary-400" />
-                        <span className="font-medium">
-                          {new Date(leave.start_date).toLocaleDateString()} — {new Date(leave.end_date).toLocaleDateString()}
-                          <span className="text-secondary-400 ml-2 font-normal">({leave.total_days} days)</span>
-                        </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 bg-secondary-50/50 p-6 rounded-2xl border border-secondary-100/50">
+                      <div className="flex items-center text-secondary-700">
+                        <div className="p-2.5 bg-white rounded-xl shadow-sm mr-4 border border-secondary-100">
+                          <Calendar size={20} className="text-indigo-500" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-extrabold text-secondary-400 uppercase tracking-widest mb-0.5">Duration</p>
+                          <p className="font-bold text-secondary-900">
+                            {new Date(leave.start_date).toLocaleDateString()} — {new Date(leave.end_date).toLocaleDateString()}
+                            <span className="text-primary-600 ml-2">({leave.total_days} days)</span>
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex items-start text-sm text-secondary-700">
-                        <FileText size={18} className="mr-3 mt-0.5 text-secondary-400" />
-                        <p className="italic line-clamp-1">"{leave.reason}"</p>
+                      <div className="flex items-start text-secondary-700">
+                        <div className="p-2.5 bg-white rounded-xl shadow-sm mr-4 border border-secondary-100">
+                          <FileText size={20} className="text-indigo-400" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-extrabold text-secondary-400 uppercase tracking-widest mb-0.5">Reason</p>
+                          <p className="font-medium text-secondary-600 line-clamp-1 italic">"{leave.reason}"</p>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Stats */}
-                    <div className="mt-4 flex gap-6 text-xs font-medium text-secondary-500 uppercase tracking-widest">
-                      <span className="flex items-center"><div className="w-2 h-2 rounded-full bg-orange-400 mr-2"></div> Sick Bal: {leave.employee?.sick_leave_balance}</span>
-                      <span className="flex items-center"><div className="w-2 h-2 rounded-full bg-indigo-400 mr-2"></div> Casual Bal: {leave.employee?.casual_leave_balance}</span>
+                    {/* Balance Indicators */}
+                    <div className="mt-6 flex flex-wrap gap-4">
+                      <div className="px-3 py-1.5 bg-white rounded-lg border border-secondary-100 flex items-center text-[10px] font-extrabold uppercase tracking-widest">
+                        <div className="w-2 h-2 rounded-full bg-orange-400 mr-2 shadow-[0_0_8px_rgba(251,146,60,0.5)]"></div>
+                        <span className="text-secondary-400 mr-2">Sick:</span>
+                        <span className="text-secondary-900">{leave.employee?.sick_leave_balance}d</span>
+                      </div>
+                      <div className="px-3 py-1.5 bg-white rounded-lg border border-secondary-100 flex items-center text-[10px] font-extrabold uppercase tracking-widest">
+                        <div className="w-2 h-2 rounded-full bg-indigo-400 mr-2 shadow-[0_0_8px_rgba(129,140,248,0.5)]"></div>
+                        <span className="text-secondary-400 mr-2">Casual:</span>
+                        <span className="text-secondary-900">{leave.employee?.casual_leave_balance}d</span>
+                      </div>
                     </div>
                   </div>
 
