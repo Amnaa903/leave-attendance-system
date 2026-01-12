@@ -23,6 +23,8 @@ model User {
   casual_leave_balance  Int          @default(7)
   medical_leave_balance Int          @default(0)
   work_from_home_balance Int         @default(5)
+  reset_token           String?
+  reset_token_expiry    DateTime?
   attendances           Attendance[]
   approvedLeaves        Leave[]      @relation("ApprovedLeaves")
   leaves                Leave[]      @relation("EmployeeLeaves")
