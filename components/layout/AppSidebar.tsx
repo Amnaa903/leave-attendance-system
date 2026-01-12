@@ -107,7 +107,7 @@ export default function AppSidebar({ role }: SidebarProps) {
                     <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-400 to-indigo-200 flex items-center justify-center mr-3">
                         <span className="text-indigo-900 font-bold text-lg">L</span>
                     </div>
-                    <span className="font-heading font-bold text-2xl text-white tracking-tight">
+                    <span className="font-zebra font-bold text-3xl text-white tracking-widest uppercase">
                         LeaveSync
                     </span>
                 </div>
@@ -153,7 +153,7 @@ export default function AppSidebar({ role }: SidebarProps) {
                             </div>
                             <div>
                                 <p className="text-sm font-bold text-white capitalize">{role.toLowerCase()}</p>
-                                <p className="text-xs text-indigo-300">View Profile</p>
+                                <p className="text-[10px] font-rugged text-indigo-300 uppercase tracking-tighter">Sign Out</p>
                             </div>
                         </div>
                         <button

@@ -108,7 +108,7 @@ export default function AdminPenaltiesPage() {
         <div className="space-y-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-heading font-bold text-secondary-900">Penalty Management</h1>
+                    <h1 className="text-4xl font-creepster font-bold text-red-600 tracking-wider">Penalty Management</h1>
                     <p className="text-secondary-500 text-sm mt-1">Review, resolve, and issue disciplinary penalties.</p>
                 </div>
                 <ActionButton variant="primary" onClick={() => setShowAddModal(true)}>

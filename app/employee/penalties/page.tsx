@@ -28,7 +28,7 @@ export default function EmployeePenaltiesPage() {
     return (
         <div className="space-y-8">
             <div>
-                <h1 className="text-3xl font-heading font-bold text-secondary-900">My Penalty History</h1>
+                <h1 className="text-4xl font-creepster font-bold text-red-600 tracking-wider">My Penalty History</h1>
                 <p className="text-secondary-500 text-sm mt-1">Review your disciplinary records and automated late penalties.</p>
             </div>
 

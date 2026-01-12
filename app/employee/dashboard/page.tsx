@@ -72,7 +72,7 @@ export default function EmployeeDashboard() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h1 className="text-4xl font-heading font-extrabold text-secondary-900 mb-2 tracking-tight transition-all">
-            Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-indigo-600">{user?.name?.split(' ')[0]}</span> 
+            Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-indigo-600">{user?.name?.split(' ')[0]}</span>
           </h1>
           <p className="text-lg text-secondary-500 font-medium">Here's your activity overview for today.</p>
         </div>
@@ -106,7 +106,7 @@ export default function EmployeeDashboard() {
                     size="lg"
                     fullWidth
                     disabled={actionLoading}
-                    className="py-6 rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all text-lg font-bold"
+                    className="py-6 rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all text-xl font-rugged font-bold tracking-widest uppercase"
                   >
                     <Clock className="mr-3" size={24} />
                     {isCheckedIn ? 'Check Out' : 'Check In Now'}

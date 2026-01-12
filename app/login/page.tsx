@@ -62,7 +62,7 @@ export default function LoginPage() {
             <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm border border-white/20">
               <LogIn className="text-white" size={24} />
             </div>
-            <span className="text-xl font-bold font-heading tracking-tight">LMS Portal</span>
+            <span className="text-3xl font-zebra font-bold tracking-widest uppercase text-white">LMS Portal</span>
           </div>
 
           <div className="space-y-6 max-w-lg">
@@ -152,7 +152,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-primary-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group"
+              className="w-full bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 text-white font-rugged font-bold py-3.5 rounded-xl shadow-lg shadow-primary-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group tracking-wider uppercase"
             >
               {loading ? 'Signing in...' : 'Sign in'}
               {!loading && <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />}

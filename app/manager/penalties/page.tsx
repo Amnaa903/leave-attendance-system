@@ -94,7 +94,7 @@ export default function ManagerPenaltiesPage() {
         <div className="space-y-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-heading font-bold text-secondary-900">Manage Team Penalties</h1>
+                    <h1 className="text-4xl font-creepster font-bold text-red-600 tracking-wider">Manage Team Penalties</h1>
                     <p className="text-secondary-500 text-sm mt-1">Monitor and issue disciplinary actions for your team.</p>
                 </div>
                 <ActionButton variant="primary" onClick={() => setShowAddModal(true)}>

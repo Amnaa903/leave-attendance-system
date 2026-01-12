@@ -8,9 +8,10 @@ interface StatCardProps {
   subtitle?: string
   icon?: ReactNode
   color?: "blue" | "green" | "orange" | "pink" | "purple" | "cyan"
+  valueClassName?: string
 }
 
-export function StatCard({ title, value, subtitle, icon, color = "blue" }: StatCardProps) {
+export function StatCard({ title, value, subtitle, icon, color = "blue", valueClassName = "" }: StatCardProps) {
   const colorClasses = {
     blue: "from-blue-500 to-indigo-500",
     green: "from-emerald-500 to-teal-500",
@@ -49,7 +50,7 @@ export function StatCard({ title, value, subtitle, icon, color = "blue" }: StatC
       <div className="flex items-center justify-between relative z-10">
         <div className="flex-1">
           <p className="text-xs font-bold text-secondary-500 mb-2 uppercase tracking-widest">{title}</p>
-          <div className="text-3xl font-heading font-extrabold text-secondary-900 mb-1 tracking-tight">
+          <div className={`text-3xl font-heading font-extrabold text-secondary-900 mb-1 tracking-tight ${valueClassName}`}>
             {value}
           </div>
           {subtitle && (

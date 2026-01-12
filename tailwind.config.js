@@ -11,6 +11,9 @@ module.exports = {
       fontFamily: {
         sans: ['var(--font-inter)', 'sans-serif'],
         heading: ['var(--font-outfit)', 'sans-serif'],
+        creepster: ['var(--font-creepster)', 'cursive'],
+        rugged: ['var(--font-rugged)', 'display'],
+        zebra: ['var(--font-zebra)', 'serif'],
       },
       colors: {
         primary: {

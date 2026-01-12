@@ -80,7 +80,7 @@ export default function AdminDashboard() {
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
         <div>
-          <h1 className="text-3xl font-heading font-bold text-secondary-900">Dashboard Overview</h1>
+          <h1 className="text-4xl font-zebra font-bold text-secondary-900 tracking-wider">Dashboard Overview</h1>
           <p className="text-secondary-500 mt-1">Here's what's happening with your organization today.</p>
         </div>
         <div className="flex items-center space-x-3 mt-4 sm:mt-0">
@@ -105,6 +105,7 @@ export default function AdminDashboard() {
             subtitle={stat.change}
             icon={<stat.icon size={24} />}
             color={stat.color as any}
+            valueClassName={stat.title === "Active Issues" ? "font-creepster text-3xl" : ""}
           />
         ))}
       </div>
