@@ -151,7 +151,7 @@ export default function EmployeeDashboard() {
             <Calendar size={18} />
             Apply for Leave
           </ActionButton>
-          <ActionButton variant="secondary" className="bg-white border-secondary-200">
+          <ActionButton variant="secondary" onClick={() => window.location.href = '/employee/attendance'} className="bg-white border-secondary-200 hover:bg-secondary-50">
             <FileText size={18} />
             View History
           </ActionButton>
