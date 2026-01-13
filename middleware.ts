@@ -4,8 +4,9 @@ import type { NextRequest } from 'next/server';
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
-  // 1. Public Paths: Login and Root
-  if (path === '/login' || path === '/' || path === '/api/auth/login') {
+  // 1. Public Paths: Login, Root, and Static Assets
+  const isPublicAsset = path.match(/\.(png|jpg|jpeg|gif|svg|ico|webp)$/);
+  if (path === '/login' || path === '/' || path === '/api/auth/login' || isPublicAsset) {
     return NextResponse.next();
   }
 
