@@ -14,13 +14,15 @@ import {
   UserPlus,
   FileText,
   BarChart3,
+  CheckCircle,
+  XCircle,
 } from "lucide-react"
 import { StatCard } from "@/components/ui/stat-card"
 import { ModernCard } from "@/components/ui/modern-card"
 import { ActionButton } from "@/components/ui/action-button"
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState("1m")
+  const [activeTab, setActiveTab] = useState("7d")
 
   const [statsData, setStatsData] = useState([
     { title: "Total Employees", value: "-", change: "...", icon: Users, color: "blue" },
@@ -28,6 +30,8 @@ export default function AdminDashboard() {
     { title: "Today's Attendance", value: "-", change: "...", icon: Clock, color: "green" },
     { title: "Active Issues", value: "-", change: "...", icon: AlertCircle, color: "pink" },
   ]);
+  const [breakdown, setBreakdown] = useState<any>(null);
+  const [historicalData, setHistoricalData] = useState<any[]>([]);
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,16 +45,15 @@ export default function AdminDashboard() {
 
         if (statsRes.ok) {
           const data = await statsRes.json();
-          // Map icon strings back to components if needed, or update API to return data only
-          // For now, assuming API returns structure that matches, but we need to map icons manually
-          // creating a map of icon names
           const iconMap: any = { Users, Calendar, Clock, AlertCircle };
 
           const formattedStats = data.stats.map((s: any) => ({
             ...s,
-            icon: iconMap[s.icon] || Users // Fallback
+            icon: iconMap[s.icon] || Users
           }));
           setStatsData(formattedStats);
+          setBreakdown(data.breakdown);
+          setHistoricalData(data.historicalData || []);
         }
 
         if (activityRes.ok) {
@@ -68,22 +71,28 @@ export default function AdminDashboard() {
     fetchData();
   }, []);
 
-
-
   const handleLogout = () => {
     document.cookie = "token=; path=/; max-age=0"
     window.location.href = "/login"
   }
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
+      </div>
+    )
+  }
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-fade-in">
       {/* Header Section */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-4xl font-zebra font-bold text-secondary-900 tracking-wider">Dashboard Overview</h1>
-          <p className="text-secondary-500 mt-1">Here's what's happening with your organization today.</p>
+          <p className="text-secondary-500 mt-1">Real-time organization metrics and attendance status.</p>
         </div>
-        <div className="flex items-center space-x-3 mt-4 sm:mt-0">
+        <div className="flex items-center space-x-3">
           <ActionButton variant="secondary" size="sm">
             <Download size={18} />
             Export Report
@@ -115,69 +124,80 @@ export default function AdminDashboard() {
         {/* Left Column */}
         <div className="lg:col-span-2 space-y-8">
           {/* Attendance Chart */}
-          <ModernCard title="Attendance Overview" subtitle="Monthly attendance trends">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex space-x-2">
-                {["7D", "1M", "3M", "1Y"].map((period) => (
-                  <button
-                    key={period}
-                    onClick={() => setActiveTab(period.toLowerCase())}
-                    className={`px-3 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === period.toLowerCase()
-                      ? "bg-primary-50 text-primary-600 border border-primary-200"
-                      : "text-secondary-600 hover:bg-secondary-50"
-                      }`}
-                  >
-                    {period}
-                  </button>
-                ))}
-              </div>
-            </div>
+          <ModernCard title="Attendance Overview" subtitle="Attendance percentage over the last 7 days">
+            <div className="h-72 mt-6">
+              {historicalData.length > 0 ? (
+                <div className="h-full flex items-end space-x-4">
+                  {historicalData.map((item, index) => (
+                    <div key={index} className="flex-1 flex flex-col items-center group relative">
+                      {/* Tooltip */}
+                      <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-secondary-900 text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none">
+                        {item.percentage}% Attendance
+                      </div>
 
-            <div className="h-64 flex items-end space-x-2">
-              {[65, 80, 60, 75, 90, 85, 70].map((height, index) => (
-                <div key={index} className="flex-1 flex flex-col items-center group">
-                  <div
-                    className="w-full bg-gradient-to-t from-primary-500 to-indigo-400 rounded-t-lg transition-all hover:opacity-80 cursor-pointer group-hover:shadow-lg"
-                    style={{ height: `${height}%` }}
-                  ></div>
-                  <span className="text-xs text-secondary-400 mt-2 group-hover:font-semibold transition-all">
-                    Day {index + 1}
-                  </span>
+                      <div
+                        className="w-full bg-gradient-to-t from-primary-600 to-indigo-400 rounded-t-xl transition-all duration-500 ease-out hover:from-primary-500 hover:to-indigo-300 cursor-pointer shadow-sm hover:shadow-md group-hover:scale-x-105"
+                        style={{ height: `${Math.max(item.percentage, 5)}%` }}
+                      ></div>
+                      <span className="text-[10px] font-bold text-secondary-500 mt-3 uppercase tracking-tighter group-hover:text-primary-600 transition-colors">
+                        {item.day}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              ) : (
+                <div className="h-full flex items-center justify-center border-2 border-dashed border-secondary-100 rounded-2xl text-secondary-400">
+                  <BarChart3 size={48} className="mr-3 opacity-20" />
+                  <p className="font-medium text-sm">No historical data available yet</p>
+                </div>
+              )}
             </div>
           </ModernCard>
 
-          {/* Quick Stats Row */}
+          {/* Workforce Status Breakdown */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-gradient-to-br from-primary-600 to-indigo-500 rounded-2xl p-6 text-white shadow-soft card-hover">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-indigo-100 font-medium text-sm">Avg. Check-in</p>
-                  <p className="text-2xl font-bold mt-2 font-heading">09:14 AM</p>
+            <div className="bg-white border border-secondary-200 rounded-2xl p-6 shadow-soft card-hover relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-16 h-16 bg-emerald-500/5 rounded-bl-full transition-transform group-hover:scale-110" />
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-2 bg-emerald-100 rounded-lg text-emerald-600">
+                  <CheckCircle size={20} />
                 </div>
-                <Clock size={24} className="text-white/60" />
+                <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Active</span>
+              </div>
+              <p className="text-secondary-500 font-bold text-xs uppercase tracking-wider">Present Today</p>
+              <p className="text-3xl font-heading font-extrabold mt-1 text-secondary-900">{breakdown?.present || 0}</p>
+              <div className="mt-3 w-full bg-secondary-100 h-1.5 rounded-full overflow-hidden">
+                <div
+                  className="bg-emerald-500 h-full rounded-full transition-all duration-1000"
+                  style={{ width: `${breakdown?.total ? (breakdown.present / breakdown.total) * 100 : 0}%` }}
+                />
               </div>
             </div>
 
-            <div className="bg-white border border-secondary-200 rounded-2xl p-6 shadow-soft card-hover">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-secondary-500 font-medium text-sm">Productivity</p>
-                  <p className="text-2xl font-bold mt-2 font-heading text-emerald-600">87.5%</p>
+            <div className="bg-white border border-secondary-200 rounded-2xl p-6 shadow-soft card-hover relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-16 h-16 bg-amber-500/5 rounded-bl-full transition-transform group-hover:scale-110" />
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-2 bg-amber-100 rounded-lg text-amber-600">
+                  <Clock size={20} />
                 </div>
-                <TrendingUp size={24} className="text-emerald-500/60" />
+                <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">Delayed</span>
               </div>
+              <p className="text-secondary-500 font-bold text-xs uppercase tracking-wider">Late Arrivals</p>
+              <p className="text-3xl font-heading font-extrabold mt-1 text-secondary-900">{breakdown?.late || 0}</p>
+              <p className="text-[10px] text-secondary-400 mt-2 font-medium">Excluding early departures</p>
             </div>
 
-            <div className="bg-white border border-secondary-200 rounded-2xl p-6 shadow-soft card-hover">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-secondary-500 font-medium text-sm">Pending Tasks</p>
-                  <p className="text-2xl font-bold mt-2 font-heading text-amber-600">12</p>
+            <div className="bg-white border border-secondary-200 rounded-2xl p-6 shadow-soft card-hover relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-16 h-16 bg-rose-500/5 rounded-bl-full transition-transform group-hover:scale-110" />
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-2 bg-rose-100 rounded-lg text-rose-600">
+                  <XCircle size={20} />
                 </div>
-                <FileText size={24} className="text-amber-500/60" />
+                <span className="text-xs font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">Unavailable</span>
               </div>
+              <p className="text-secondary-500 font-bold text-xs uppercase tracking-wider">Absent / On Leave</p>
+              <p className="text-3xl font-heading font-extrabold mt-1 text-secondary-900">{breakdown?.absent || 0}</p>
+              <p className="text-[10px] text-secondary-400 mt-2 font-medium">Out of {breakdown?.total || 0} total employees</p>
             </div>
           </div>
         </div>
@@ -187,30 +207,29 @@ export default function AdminDashboard() {
           {/* Recent Activity */}
           <ModernCard title="Recent Activity">
             <div className="space-y-4">
-              {activities.length === 0 ? <p className="text-secondary-500 text-sm">No recent activity</p> : null}
+              {activities.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-8 opacity-40">
+                  <Bell size={40} className="text-secondary-300 mb-2" />
+                  <p className="text-secondary-500 text-xs font-bold uppercase tracking-widest">No activity</p>
+                </div>
+              ) : null}
               {activities.map((activity: any, index) => (
                 <div
                   key={index}
-                  className="flex items-start space-x-3 group hover:bg-secondary-50 p-2 rounded-lg transition"
+                  className="flex items-start space-x-3 group hover:bg-secondary-50 p-2.5 rounded-xl transition-all cursor-pointer border border-transparent hover:border-secondary-100 shadow-sm hover:shadow"
                 >
                   <div
-                    className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${activity.type === "leave"
-                      ? "bg-blue-100"
-                      : activity.type === "attendance"
-                        ? "bg-emerald-100"
-                        : activity.type === "medical"
-                          ? "bg-rose-100"
-                          : "bg-secondary-100"
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm ${activity.type === "leave"
+                      ? "bg-blue-100 text-blue-600"
+                      : "bg-emerald-100 text-emerald-600"
                       }`}
                   >
-                    {activity.type === "leave" && <Calendar size={18} className="text-blue-600" />}
-                    {activity.type === "attendance" && <Clock size={18} className="text-emerald-600" />}
-                    {activity.type === "medical" && <AlertCircle size={18} className="text-rose-600" />}
+                    {activity.type === "leave" ? <Calendar size={18} /> : <Clock size={18} />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-secondary-900">{activity.user}</p>
-                    <p className="text-sm text-secondary-600 truncate">{activity.action}</p>
-                    <p className="text-xs text-secondary-400 mt-1">{activity.time}</p>
+                    <p className="text-sm font-bold text-secondary-900 group-hover:text-primary-600 transition-colors">{activity.user}</p>
+                    <p className="text-xs text-secondary-500 font-medium truncate mt-0.5 capitalize">{activity.action}</p>
+                    <p className="text-[10px] text-secondary-400 mt-1 font-bold">{activity.time} • {activity.date}</p>
                   </div>
                 </div>
               ))}
@@ -219,18 +238,18 @@ export default function AdminDashboard() {
 
           {/* Quick Actions */}
           <ModernCard title="Quick Actions">
-            <div className="space-y-2">
-              <ActionButton fullWidth variant="primary" size="md" onClick={() => window.location.href = '/admin/users'}>
-                <Users size={18} />
-                Manage Users
+            <div className="space-y-3">
+              <ActionButton fullWidth variant="primary" size="md" onClick={() => window.location.href = '/admin/users'} className="shadow-lg shadow-primary-500/20 py-4 font-bold tracking-wide">
+                <Users size={18} className="mr-2" />
+                Manage Employees
               </ActionButton>
-              <ActionButton fullWidth variant="secondary" size="md">
-                <BarChart3 size={18} />
-                View Reports
+              <ActionButton fullWidth variant="secondary" size="md" onClick={() => window.location.href = '/manager/attendance'} className="py-4 font-bold border-secondary-200">
+                <BarChart3 size={18} className="mr-2" />
+                Detailed Attendance
               </ActionButton>
-              <ActionButton fullWidth variant="secondary" size="md">
-                <Settings size={18} />
-                System Settings
+              <ActionButton fullWidth variant="secondary" size="md" className="py-4 font-bold border-secondary-200 opacity-60">
+                <Settings size={18} className="mr-2" />
+                System Config
               </ActionButton>
             </div>
           </ModernCard>

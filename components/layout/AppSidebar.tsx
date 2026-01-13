@@ -67,10 +67,10 @@ export default function AppSidebar({ role }: SidebarProps) {
             roles: ['EMPLOYEE']
         },
         {
-            label: 'Emp. Attendance', // For Managers
-            href: '/manager/attendance',
+            label: 'Emp. Attendance', // For Managers & Admins
+            href: '/manager/attendance', // Admins use same view as managers for now
             icon: Clock,
-            roles: ['MANAGER']
+            roles: ['MANAGER', 'ADMIN']
         },
         // Add Admin Stats/Reports if separate link needed
     ];
