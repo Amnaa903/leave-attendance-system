@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { LogIn, Mail, Lock, ArrowRight, CheckCircle } from 'lucide-react';
-import Image from 'next/image';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -47,22 +46,23 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen w-full flex">
       {/* Left Side - Image Section (Hidden on mobile) */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-secondary-900">
-        <Image
-          src="/login-bg.png"
+      <div
+        className="hidden lg:flex lg:w-1/2 relative bg-secondary-900 overflow-hidden"
+        style={{ backgroundImage: 'url("/login-portal-bg.png")', backgroundSize: 'cover', backgroundPosition: 'center' }}
+      >
+        <img
+          src="/login-portal-bg.png"
           alt="Office Workspace"
-          fill
-          className="object-cover opacity-80 mix-blend-overlay"
-          priority
+          className="absolute inset-0 w-full h-full object-cover opacity-90 transition-opacity hover:opacity-100"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-900/90 to-secondary-900/90" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-900/40 to-secondary-900/40" />
 
         <div className="relative z-10 flex flex-col justify-between h-full p-12 text-white">
           <div className="flex items-center gap-2">
-            <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm border border-white/20">
+            <div className="p-2 bg-primary-600/20 rounded-lg backdrop-blur-md border border-white/20">
               <LogIn className="text-white" size={24} />
             </div>
-            <span className="text-3xl font-zebra font-bold tracking-widest uppercase text-white">LMS Portal</span>
+            <span className="text-3xl font-zebra font-bold tracking-[0.2em] uppercase text-white drop-shadow-lg">LMS Portal</span>
           </div>
 
           <div className="space-y-6 max-w-lg">
@@ -152,7 +152,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 text-white font-rugged font-bold py-3.5 rounded-xl shadow-lg shadow-primary-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group tracking-wider uppercase"
+              className="w-full bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 text-white font-rugged font-bold py-4 rounded-xl shadow-xl shadow-primary-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group tracking-widest uppercase text-lg"
             >
               {loading ? 'Signing in...' : 'Sign in'}
               {!loading && <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />}
